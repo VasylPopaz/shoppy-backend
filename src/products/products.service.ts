@@ -1,4 +1,6 @@
+import { promises as fs } from 'fs';
 import { Injectable } from '@nestjs/common';
+import { join } from 'path';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductRequest } from './dto/create-product.request';
@@ -11,6 +13,26 @@ export class ProductsService {
   }
 
   async getProducts() {
-    return this.prismaService.product.findMany();
+    const products = await this.prismaService.product.findMany();
+
+    return Promise.all(
+      products.map(async (product) => ({
+        ...product,
+        imageExists: await this.imageExists(product.id),
+      })),
+    );
+  }
+
+  private async imageExists(productId: number) {
+    try {
+      await fs.access(
+        join(__dirname, '../../', `public/products/${productId}.jpg`),
+        fs.constants.F_OK,
+      );
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
   }
 }
