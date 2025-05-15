@@ -44,6 +44,13 @@ export class ProductsService {
     }
   }
 
+  async update(productId: number, data: Prisma.ProductUpdateInput) {
+    return this.prismaService.product.update({
+      where: { id: productId },
+      data,
+    });
+  }
+
   private async imageExists(productId: number) {
     try {
       await fs.access(
