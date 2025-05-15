@@ -1,3 +1,4 @@
+import Stripe from 'stripe';
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -12,5 +13,10 @@ export class CheckoutController {
   @UseGuards(JwtAuthGuard)
   async createSession(@Body() request: CreateSessionRequest) {
     return this.checkoutService.createSession(request.productId);
+  }
+
+  @Post('webhook')
+  async handleCheckoutWebhooks(@Body() event: Stripe.Event) {
+    return this.checkoutService.handleCheckoutWebhook(event);
   }
 }
